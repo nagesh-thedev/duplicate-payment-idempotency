@@ -22,17 +22,50 @@ public class PaymentServiceImpl implements PaymentService {
 		super();
 		this.paymentRepo = paymentRepo;
 	}
-
-
-
+// V1
+//	@Override
+//	public PaymentResponse processPayment(PaymentRequest request) throws InterruptedException {
+//			Payment payment = requestMapper(request);
+//			Thread.sleep(1000);
+//			payment.setStatus(PaymentStatus.SUCCESS);
+//			PaymentResponse response = responseMapper(paymentRepo.save(payment));
+//			return response;
+//	}
+// V2
+//	@Override
+//	public PaymentResponse processPayment(PaymentRequest request) throws InterruptedException {
+//		if(!paymentRepo.existsByUserIdAndAmount(request.getUserId(),request.getAmount())) {
+//			Payment payment = requestMapper(request);
+//			Thread.sleep(1000);
+//			payment.setStatus(PaymentStatus.SUCCESS);
+//			PaymentResponse response = responseMapper(paymentRepo.save(payment));
+//			return response;
+//		}else {
+//			PaymentResponse response = new PaymentResponse();
+//			response.setMessage("PaymentFailed");
+//			response.setStatus(PaymentStatus.FAILED);
+//			return response;
+//		}
+//		
+//	
+//	}
+    
+	
 	@Override
 	public PaymentResponse processPayment(PaymentRequest request) throws InterruptedException {
-		Payment payment = requestMapper(request);
-		
+		if(!paymentRepo.existsByUserIdAndAmount(request.getUserId(),request.getAmount())) {
+			Payment payment = requestMapper(request);
 			Thread.sleep(1000);
 			payment.setStatus(PaymentStatus.SUCCESS);
 			PaymentResponse response = responseMapper(paymentRepo.save(payment));
 			return response;
+		}else {
+			PaymentResponse response = new PaymentResponse();
+			response.setMessage("PaymentFailed");
+			response.setStatus(PaymentStatus.FAILED);
+			return response;
+		}
+		
 	
 	}
 
