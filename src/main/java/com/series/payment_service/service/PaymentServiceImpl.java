@@ -3,12 +3,15 @@ package com.series.payment_service.service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.stereotype.Service;
+
 import com.series.payment_service.Constants.PaymentStatus;
 import com.series.payment_service.dto.PaymentRequest;
 import com.series.payment_service.dto.PaymentResponse;
 import com.series.payment_service.entity.Payment;
 import com.series.payment_service.repositories.PaymentRepo;
 
+@Service
 public class PaymentServiceImpl implements PaymentService {
      
 	private PaymentRepo paymentRepo;
@@ -28,7 +31,6 @@ public class PaymentServiceImpl implements PaymentService {
 		
 			Thread.sleep(1000);
 			payment.setStatus(PaymentStatus.SUCCESS);
-			payment.setCreatedAt(LocalDateTime.now());
 			PaymentResponse response = responseMapper(paymentRepo.save(payment));
 			return response;
 	
@@ -50,6 +52,7 @@ public class PaymentServiceImpl implements PaymentService {
 		Payment pay = new Payment();
 		pay.setUserId(request.getUserId());
 		pay.setAmount(request.getAmount());
+		pay.setCreatedAt(LocalDateTime.now());
 		pay.setPaymentReference(UUID.randomUUID().toString());
 		pay.setStatus(PaymentStatus.INITIATED);
 		return pay;
