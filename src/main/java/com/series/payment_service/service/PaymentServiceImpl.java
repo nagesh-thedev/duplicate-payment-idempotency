@@ -1,8 +1,10 @@
 package com.series.payment_service.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.series.payment_service.Constants.PaymentStatus;
@@ -52,21 +54,34 @@ public class PaymentServiceImpl implements PaymentService {
     
 	
 	@Override
-	public PaymentResponse processPayment(PaymentRequest request) throws InterruptedException {
-		if(!paymentRepo.existsByUserIdAndAmount(request.getUserId(),request.getAmount())) {
+	public PaymentResponse processPayment(PaymentRequest request,String key) throws InterruptedException {
+		if(!paymentRepo.existsByIdempotencyKey(key)) {
 			Payment payment = requestMapper(request);
+			payment.setIdempotencyKey(key);
 			Thread.sleep(1000);
 			payment.setStatus(PaymentStatus.SUCCESS);
-			PaymentResponse response = responseMapper(paymentRepo.save(payment));
+			try {
+			Payment savedpayment = paymentRepo.save(payment);
+			PaymentResponse response = responseMapper(savedpayment);
 			return response;
+			}catch(DataIntegrityViolationException e) {
+				Optional<Payment> savedpayment = paymentRepo.findByIdempotencyKey(key);
+				if(savedpayment.isPresent()) {
+					PaymentResponse response = responseMapper(savedpayment.get());
+					return response;
+				}else {
+					PaymentResponse response = new PaymentResponse();
+					response.setMessage("Payment result could not be retrieved");
+					response.setStatus(PaymentStatus.FAILED);
+					return response;
+				}
+			}
 		}else {
-			PaymentResponse response = new PaymentResponse();
-			response.setMessage("PaymentFailed");
-			response.setStatus(PaymentStatus.FAILED);
-			return response;
+				PaymentResponse response = new PaymentResponse();
+				response.setMessage("PaymentFailed");
+				response.setStatus(PaymentStatus.FAILED);
+				return response;
 		}
-		
-	
 	}
 
 

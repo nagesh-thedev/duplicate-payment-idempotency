@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import com.series.payment_service.Constants.PaymentStatus;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -30,6 +31,9 @@ public class Payment {
 	
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus status;
+	
+	@Column(unique = true)
+	private String idempotencyKey;
 	
 	private LocalDateTime createdAt;
 
