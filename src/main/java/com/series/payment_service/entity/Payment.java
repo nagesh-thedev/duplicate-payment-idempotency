@@ -32,8 +32,10 @@ public class Payment {
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus status;
 	
+	//V6 DB Restrictions
 	@Column(unique = true)
 	private String idempotencyKey;
+	
 	
 	private LocalDateTime createdAt;
 
